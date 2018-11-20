@@ -1,12 +1,15 @@
 import socket
 import re
+import sys
+
+# This is a pointer to the module object instance itself
+this = sys.modules[__name__]
+
+this.sock = None
 
 tello_ip = '192.168.10.1'
 tello_port = 8889
 tello_addr = (tello_ip, tello_port)
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind(('', 9000))
 
 def send(command):
   """Sends a command to the drone.
@@ -14,7 +17,7 @@ def send(command):
       str: command -- The command to send to the drone
   """
   try:
-    sock.sendto(command.encode(), tello_addr)
+    this.sock.sendto(command.encode(), tello_addr)
   except Exception as e:
     # TODO: Should we throw an exception?
     print("Error sending command to drone:\n\t" + str(e))
@@ -25,7 +28,7 @@ def receive():
       str: The response from the drone
   """
   try:
-    response, ip_address = sock.recvfrom(128)
+    response, ip_address = this.sock.recvfrom(128)
     response = response.decode(encoding='utf-8')
     return response
   except Exception as e:
@@ -46,9 +49,12 @@ def send_and_wait(command):
 
 def start():
     """Tell the drone to start receiving commands."""
+    if (this.sock is None):
+        this.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        this.sock.bind(('', 9000))
     response = send_and_wait("command")
     if response != "ok":
-        raise RuntimeError("Drone failed to enter SDK mode.")
+       raise RuntimeError("Drone failed to enter SDK mode.")
 
 def takeoff():
     """Sends the command to the drone to take off."""
