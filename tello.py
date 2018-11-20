@@ -84,11 +84,41 @@ def forward(centimeters):
     """Moves forward by a set distance
 
     Arguments:
-        int: centimeters (20-500) -- The distance to move foward by in centimeters
+        int: centimeters (20-500) -- The distance to move forward by in centimeters
     """
     assert(centimeters >= 20), "Distance is less than 20cm (valid range is 20cm-500cm)."
     assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
     response = send_and_wait('forward %d' % (centimeters))
+
+def up(centimeters):
+    """Moves up by a set distance
+
+    Arguments:
+        int: centimeters (20-500) -- The distance to move up by in centimeters
+    """
+    assert(centimeters >= 20), "Distance is less than 20cm (valid range is 20cm-500cm)."
+    assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
+    response = send_and_wait('up %d' % (centimeters))
+
+def down(centimeters):
+    """Moves down by a set distance
+
+    Arguments:
+        int: centimeters (20-500) -- The distance to move down by in centimeters
+    """
+    assert(centimeters >= 20), "Distance is less than 20cm (valid range is 20cm-500cm)."
+    assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
+    response = send_and_wait('down %d' % (centimeters))
+
+def anticlockwise(degrees):
+    """Rotate anti-clockwise
+
+    Arguments:
+        int: degrees (1-360) -- Number of degrees to turn by
+    """
+    assert(degrees > 0), "Valid range for degrees to turn by is 1-360"
+    assert(degrees <= 360), "Valid range for degrees to turn by is 1-360"
+    response = send_and_wait('ccw %d' % (degrees))
 
 def clockwise(degrees):
     """Rotate clockwise
