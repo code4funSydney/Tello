@@ -16,6 +16,8 @@ def send(command):
   Arguments:
       str: command -- The command to send to the drone
   """
+  if this.sock is None:
+      raise RuntimeError("Call start() first!")
   try:
     this.sock.sendto(command.encode(), tello_addr)
   except Exception as e:
@@ -134,6 +136,5 @@ def flip_forward():
     """Performs a forward flip."""
     # TODO: Assert battery is high enough to perform flip before attempting
     send_and_wait("flip f")
-
 
 
