@@ -1,6 +1,8 @@
 import socket
 import re
 import sys
+import cv2
+import threading
 
 # This is a pointer to the module object instance itself
 this = sys.modules[__name__]
@@ -137,4 +139,38 @@ def flip_forward():
     # TODO: Assert battery is high enough to perform flip before attempting
     send_and_wait("flip f")
 
+
+class VideoStream:
+    started = False
+    thread = None
+    kill_event = None
+
+    def start(self):
+        if not self.started:
+            send_and_wait("streamon")
+            self.kill_event = threading.Event()
+            self.thread = threading.Thread(target=self._work, args=[self.kill_event])
+            self.thread.start()
+            self.started = True
+
+    def _work(self, stop_event):
+        cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
+        #cap = cv2.VideoCapture(0) 
+        while not stop_event.is_set():
+            ret, frame = cap.read()
+            cv2.imshow('Video', frame)
+            cv2.waitKey(1)
+        cv2.destroyAllWindows()
+        cap.release()
+
+    def stop(self):
+        if self.started:
+            self.kill_event.set()
+            self.thread.join()
+            self.started = False
+            send_and_wait("streamoff")
+
+    def __del__(self):
+        if self.started:
+            self.stop()
 
