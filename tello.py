@@ -102,6 +102,36 @@ def forward(centimeters):
     assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
     response = send_and_wait('forward %d' % (centimeters))
 
+def backward(centimeters):
+    """Moves backward by a set distance
+
+    Arguments:
+        int: centimeters (20-500) -- The distance to move backward by in centimeters
+    """
+    assert(centimeters >= 20), "Distance is less than 20cm (valid range is 20cm-500cm)."
+    assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
+    response = send_and_wait('back %d' % (centimeters))
+
+def left(centimeters):
+    """Moves to the left by a set distance
+
+    Arguments:
+        int: centimeters (20-500) -- The distance to move left by in centimeters
+    """
+    assert(centimeters >= 20), "Distance is less than 20cm (valid range is 20cm-500cm)."
+    assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
+    response = send_and_wait('left %d' % (centimeters))
+
+def right(centimeters):
+    """Moves to the right by a set distance
+
+    Arguments:
+        int: centimeters (20-500) -- The distance to move right by in centimeters
+    """
+    assert(centimeters >= 20), "Distance is less than 20cm (valid range is 20cm-500cm)."
+    assert(centimeters <= 500), "Distance is more than 500cm (valid range is 20cm-500cm)."
+    response = send_and_wait('right %d' % (centimeters))
+
 def up(centimeters):
     """Moves up by a set distance
 
