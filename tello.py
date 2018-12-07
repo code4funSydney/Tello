@@ -3,6 +3,7 @@ import re
 import sys
 import cv2
 import threading
+import sys
 
 # This is a pointer to the module object instance itself
 this = sys.modules[__name__]
@@ -48,8 +49,15 @@ def send_and_wait(command):
     Returns:
         str: The response from the drone.
     """
-    send(command)
-    return receive()
+    try:
+        send(command)
+        return receive()
+    except KeyboardInterrupt:
+        # TODO: Test this works
+        # Kill switch in case of emergency
+        print("Interrupted. Attempting to shut off motors...")
+        send("emergency")
+        sys.exit(0)
 
 def start():
     """Tell the drone to start receiving commands."""
