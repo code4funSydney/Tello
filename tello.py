@@ -182,6 +182,8 @@ class VideoStream:
     started = False
     thread = None
     kill_event = None
+    frame = None
+    windows = {}
 
     def start(self):
         if not self.started:
@@ -196,8 +198,12 @@ class VideoStream:
         #cap = cv2.VideoCapture(0) 
         while not stop_event.is_set():
             ret, frame = cap.read()
-            cv2.imshow('Video', frame)
-            cv2.waitKey(1)
+            if ret == True:
+                self.frame = frame
+                cv2.imshow('Video Stream', frame)
+                for k,v in self.windows.items():
+                    cv2.imshow(k, v)
+                cv2.waitKey(1)
         cv2.destroyAllWindows()
         cap.release()
 
@@ -208,7 +214,17 @@ class VideoStream:
             self.started = False
             send_and_wait("streamoff")
 
+    def get_frame(self):
+        return copy.deepcopy(self.frame)
+
+    def show_frame_in_window(self, window_name, frame):
+        self.windows[window_name] = frame
+    
+    def close_window(self, window_name):
+        if window_name in self.windows:
+            del self.windows[window_name]
+            cv2.destroyWindow(window_name)
+
     def __del__(self):
         if self.started:
             self.stop()
-
