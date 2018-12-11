@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 setup(
       name = 'Tello',
       version = '0.1',
-      packages = find_packages(),
+      py_modules=['tello'],
       install_requires = [
           'opencv-python'
       ]
