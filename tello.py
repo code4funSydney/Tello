@@ -195,7 +195,6 @@ class VideoStream:
 
     def _work(self, stop_event):
         cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
-        #cap = cv2.VideoCapture(0) 
         while not stop_event.is_set():
             ret, frame = cap.read()
             if ret == True:
@@ -228,3 +227,35 @@ class VideoStream:
     def __del__(self):
         if self.started:
             self.stop()
+
+# Global video instance
+_video = None
+
+def start_video():
+    global _video
+    if _video is None:
+        _video = VideoStream()
+    _video.start()
+
+def stop_video():
+    global _video
+    if _video is not None:
+        _video.stop()
+        del _video
+        _video = None
+
+def get_video_frame():
+    global _video
+    if _video is not None:
+        return _video.get_frame()
+
+def show_frame_in_window(window_name, frame):
+    global _video
+    if _video is not None:
+        _video.show_frame_in_window(window_name, frame)
+
+def close_window(window_name):
+    global _video
+    if _video is not None:
+        _video.close_window(window_name)
+
