@@ -4,6 +4,7 @@ import sys
 import cv2
 import threading
 import sys
+import copy
 
 # This is a pointer to the module object instance itself
 this = sys.modules[__name__]
