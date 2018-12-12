@@ -10,6 +10,7 @@ import copy
 this = sys.modules[__name__]
 
 this.sock = None
+this.mon = False
 
 tello_ip = '192.168.10.1'
 tello_port = 8889
@@ -90,8 +91,22 @@ def get_tof():
     # Check the response matches what we expected
     match = re.match(r'^[0-9]*mm$', response)
     assert match, "Drone did not respond with a value in millimeters."
-
     return int(response[:-2])
+
+def get_mission_pad():
+    """Gets the current marker id
+    Returns:
+        int: The current marker id
+    """
+    if not this.mon:
+        send_and_wait("mon")
+        this.mon = True
+    response = send_and_wait("mid?")
+    # Check the response matches what we expected
+    match = re.match(r'^[0-9]*$', response)
+    assert match, "Drone did not respond with a marker id."
+    return int(response)
+
 
 def forward(centimeters):
     """Moves forward by a set distance
