@@ -1,8 +1,0 @@
-README.md
-setup.py
-tello.py
-Tello.egg-info/PKG-INFO
-Tello.egg-info/SOURCES.txt
-Tello.egg-info/dependency_links.txt
-Tello.egg-info/requires.txt
-Tello.egg-info/top_level.txt
