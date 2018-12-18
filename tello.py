@@ -230,6 +230,7 @@ class VideoStream:
                 frame = pygame.surfarray.make_surface(frame)
                 self.screen.blit(frame, (0,0))
                 pygame.display.update()
+                pygame.time.wait(16)
 
     def stop(self):
         if self.started:
