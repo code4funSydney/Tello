@@ -210,12 +210,12 @@ class VideoStream:
         if not self.started:
             send_and_wait("streamon")
             self.kill_event = threading.Event()
-            self.thread = threading.Thread(target=self._work, args=[self.kill_event])
-            self.thread.start()
-            self.started = True
             pygame.init()
             pygame.display.set_caption("Video Stream")
             self.screen = pygame.display.set_mode([640, 480])
+            self.thread = threading.Thread(target=self._work, args=[self.kill_event])
+            self.thread.start()
+            self.started = True
 
 
     def _work(self, stop_event):
