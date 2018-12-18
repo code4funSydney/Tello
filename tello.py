@@ -6,9 +6,8 @@ import threading
 import sys
 import copy
 import numpy as np
-import contextlib
-with contextlib.redirect_stdout(None):
-    import pygame
+import tkinter as tk
+from PIL import ImageTk, Image
 
 # This is a pointer to the module object instance itself
 this = sys.modules[__name__]
@@ -204,15 +203,11 @@ class VideoStream:
     kill_event = None
     frame = None
     windows = {}
-    screen = None
 
     def start(self):
         if not self.started:
             send_and_wait("streamon")
             self.kill_event = threading.Event()
-            pygame.init()
-            pygame.display.set_caption("Video Stream")
-            self.screen = pygame.display.set_mode([640, 480])
             self.thread = threading.Thread(target=self._work, args=[self.kill_event])
             self.thread.start()
             self.started = True
@@ -220,17 +215,28 @@ class VideoStream:
 
     def _work(self, stop_event):
         cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
+        root = tk.Tk()
+        root.title("Video Stream")
+        root.protocol("WM_DELETE_WINDOW", lambda: stop_event.set())
+        label = None
+        shown = False
         while not stop_event.is_set():
             ret, frame = cap.read()
             if ret == True:
                 self.frame = frame
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame = np.rot90(frame)
-                frame = np.flip(frame, 0)
-                frame = pygame.surfarray.make_surface(frame)
-                self.screen.blit(frame, (0,0))
-                pygame.display.update()
-                pygame.time.wait(16)
+                img = Image.fromarray(frame)
+                img = ImageTk.PhotoImage(img)
+                if not shown:
+                    label = tk.Label(root, image=img)
+                    label.image = img
+                    label.pack()
+                    shown = True
+                else:
+                    label.configure(image=img)
+                root.update()
+
+        root.destroy()
 
     def stop(self):
         if self.started:
@@ -238,7 +244,6 @@ class VideoStream:
             self.thread.join()
             self.started = False
             send_and_wait("streamoff")
-            pygame.quit()
 
     def get_frame(self):
         return copy.deepcopy(self.frame)

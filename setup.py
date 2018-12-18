@@ -5,6 +5,6 @@ setup(
       py_modules=['tello'],
       install_requires = [
           'opencv-python',
-          'pygame'
+          'pillow'
       ]
   )
