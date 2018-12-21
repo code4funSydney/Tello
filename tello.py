@@ -8,6 +8,8 @@ import copy
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
+import platform
+import time
 
 # This is a pointer to the module object instance itself
 this = sys.modules[__name__]
@@ -203,6 +205,7 @@ class VideoStream:
     kill_event = None
     frame = None
     windows = {}
+    label = None
 
     def start(self):
         if not self.started:
@@ -214,34 +217,39 @@ class VideoStream:
 
 
     def _work(self, stop_event):
-        cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
         root = tk.Tk()
         root.title("Video Stream")
         root.protocol("WM_DELETE_WINDOW", lambda: stop_event.set())
-        label = None
-        shown = False
+        cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
         while not stop_event.is_set():
             ret, frame = cap.read()
             if ret == True:
                 self.frame = frame
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 img = Image.fromarray(frame)
-                img = ImageTk.PhotoImage(img)
-                if not shown:
-                    label = tk.Label(root, image=img)
-                    label.image = img
-                    label.pack()
-                    shown = True
+                if platform.system() == "Darwin":
+                    temp_thread = threading.Thread(target=self._update_frame, args=[img])
+                    temp_thread.start()
+                    time.sleep(0.03)
                 else:
-                    label.configure(image=img)
-                root.update()
-
+                    self._update_frame(img)
+            root.update()
         root.destroy()
+
+    def _update_frame(self, img):
+        img = ImageTk.PhotoImage(img)
+        if self.label is None:
+            self.label = tk.Label(image=img)
+            self.label.image = img
+            self.label.pack()
+        else:
+            self.label.configure(image=img)
+            self.label.image = img
+
 
     def stop(self):
         if self.started:
             self.kill_event.set()
-            self.thread.join()
             self.started = False
             send_and_wait("streamoff")
 
