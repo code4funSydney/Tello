@@ -8,6 +8,11 @@ import copy
 import numpy as np
 import tkinter as tk
 from PIL import ImageTk, Image
+import platform
+import time
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
 
 # This is a pointer to the module object instance itself
 this = sys.modules[__name__]
@@ -206,20 +211,22 @@ class VideoStream:
 
     def start(self):
         if not self.started:
-            send_and_wait("streamon")
+            #send_and_wait("streamon")
             self.kill_event = threading.Event()
-            self.thread = threading.Thread(target=self._work, args=[self.kill_event])
+            if platform.system() == "Darwin":
+                self.thread = threading.Thread(target=self._pygame_video_loop, args=[self.kill_event])
+            else:
+                self.thread = threading.Thread(target=self._tkinter_video_loop, args=[self.kill_event])
             self.thread.start()
             self.started = True
 
 
-    def _work(self, stop_event):
-        cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
+    def _tkinter_video_loop(self, stop_event):
         root = tk.Tk()
         root.title("Video Stream")
         root.protocol("WM_DELETE_WINDOW", lambda: stop_event.set())
+        cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
         label = None
-        shown = False
         while not stop_event.is_set():
             ret, frame = cap.read()
             if ret == True:
@@ -227,23 +234,39 @@ class VideoStream:
                 frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 img = Image.fromarray(frame)
                 img = ImageTk.PhotoImage(img)
-                if not shown:
-                    label = tk.Label(root, image=img)
+                if label is None:
+                    label = tk.Label(image=img)
                     label.image = img
                     label.pack()
-                    shown = True
                 else:
                     label.configure(image=img)
-                root.update()
-
+                    label.image = img
+            root.update()
         root.destroy()
+
+    def _pygame_video_loop(self, stop_event):
+        pygame.init()
+        screen = pygame.display.set_mode([640, 480])
+        pygame.display.set_caption("Video Stream")
+        cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
+        while not stop_event.is_set():
+            ret, frame = cap.read()
+            if ret == True:
+                self.frame = frame
+                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                frame = np.rot90(frame)
+                frame = np.flip(frame, 0)
+                frame = pygame.surfarray.make_surface(frame)
+                screen.blit(frame, (0,0))
+                pygame.display.update()
+        pygame.quit()
+
 
     def stop(self):
         if self.started:
             self.kill_event.set()
-            self.thread.join()
             self.started = False
-            send_and_wait("streamoff")
+            #send_and_wait("streamoff")
 
     def get_frame(self):
         return copy.deepcopy(self.frame)
