@@ -210,6 +210,7 @@ class VideoStream:
     kill_event = None
     frame = None
     windows = {}
+    screen = None
 
     def start(self):
         if not self.started:
@@ -217,6 +218,9 @@ class VideoStream:
             self.kill_event = threading.Event()
             if platform.system() == "Darwin":
                 self.thread = threading.Thread(target=self._pygame_video_loop, args=[self.kill_event])
+                pygame.init()
+                self.screen = pygame.display.set_mode([640, 480])
+                pygame.display.set_caption("Video Stream")
             else:
                 self.thread = threading.Thread(target=self._tkinter_video_loop, args=[self.kill_event])
             self.thread.start()
@@ -247,9 +251,6 @@ class VideoStream:
         root.destroy()
 
     def _pygame_video_loop(self, stop_event):
-        pygame.init()
-        screen = pygame.display.set_mode([640, 480])
-        pygame.display.set_caption("Video Stream")
         cap = cv2.VideoCapture("udp://0.0.0.0:11111", cv2.CAP_FFMPEG)
         while not stop_event.is_set():
             ret, frame = cap.read()
@@ -259,7 +260,7 @@ class VideoStream:
                 frame = np.rot90(frame)
                 frame = np.flip(frame, 0)
                 frame = pygame.surfarray.make_surface(frame)
-                screen.blit(frame, (0,0))
+                self.screen.blit(frame, (0,0))
                 pygame.display.update()
         pygame.quit()
 
