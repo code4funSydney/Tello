@@ -110,6 +110,8 @@ def get_mission_pad():
         send_and_wait("mon")
         this.mon = True
     response = send_and_wait("mid?")
+    # Remove trailing whitespace from response
+    response = response.strip()
     # Check the response matches what we expected
     match = re.match(r'^[0-9]*$', response)
     assert match, "Drone did not respond with a marker id."
