@@ -213,7 +213,7 @@ class VideoStream:
 
     def start(self):
         if not self.started:
-            #send_and_wait("streamon")
+            send_and_wait("streamon")
             self.kill_event = threading.Event()
             if platform.system() == "Darwin":
                 self.thread = threading.Thread(target=self._pygame_video_loop, args=[self.kill_event])
@@ -268,7 +268,7 @@ class VideoStream:
         if self.started:
             self.kill_event.set()
             self.started = False
-            #send_and_wait("streamoff")
+            send_and_wait("streamoff")
 
     def get_frame(self):
         return copy.deepcopy(self.frame)
