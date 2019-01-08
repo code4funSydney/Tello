@@ -275,12 +275,13 @@ class VideoStream:
                 frame = pygame.surfarray.make_surface(frame)
                 self.screen.blit(frame, (0,0))
                 pygame.display.update()
-        pygame.quit()
 
 
     def stop(self):
         if self.started:
             self.kill_event.set()
+            if platform.system() == "Darwin":
+                pygame.quit()
             self.started = False
             send_and_wait("streamoff")
 
