@@ -101,6 +101,19 @@ def get_tof():
     assert match, "Drone did not respond with a value in millimeters."
     return int(response[:-2])
 
+def get_battery():
+    """Gets the battery value
+    Returns:
+        int: The percentage of battery remaining
+    """
+    response = send_and_wait("battery?")
+    # Remove trailing whitespace from response
+    response = response.strip()
+    # Check the response matches what we expected
+    match = re.match(r'^[0-9]*mm$', response)
+    assert match, "Drone did not respond with an integer value."
+    return int(response)
+
 def get_mission_pad():
     """Gets the current marker id
     Returns:
