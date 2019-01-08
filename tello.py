@@ -110,7 +110,7 @@ def get_battery():
     # Remove trailing whitespace from response
     response = response.strip()
     # Check the response matches what we expected
-    match = re.match(r'^[0-9]*mm$', response)
+    match = re.match(r'^[0-9]*$', response)
     assert match, "Drone did not respond with an integer value."
     return int(response)
 
