@@ -312,12 +312,14 @@ class _VideoStream:
 _video = None
 
 def start_video():
+    """ Starts the video stream """
     global _video
     if _video is None:
         _video = _VideoStream()
     _video.start()
 
 def stop_video():
+    """ Stops the video stream """
     global _video
     if _video is not None:
         _video.stop()
@@ -325,6 +327,11 @@ def stop_video():
         _video = None
 
 def get_video_frame():
+    """ Gets the last video frame from the video stream
+    
+        Returns:
+            numpy.ndarray: The last frame the video stream read
+    """
     global _video
     if _video is not None:
         return _video.get_frame()
