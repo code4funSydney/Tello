@@ -24,7 +24,7 @@ tello_ip = '192.168.10.1'
 tello_port = 8889
 tello_addr = (tello_ip, tello_port)
 
-def send(command):
+def _send(command):
   """Sends a command to the drone.
   Arguments:
       str: command -- The command to send to the drone
@@ -34,21 +34,22 @@ def send(command):
   try:
     this.sock.sendto(command.encode(), tello_addr)
   except Exception as e:
-    # TODO: Should we throw an exception?
     print("Error sending command to drone:\n\t" + str(e))
 
-def receive():
+def _receive():
   """Waits for and returns the response from the drone.
   Returns:
       str: The response from the drone
   """
   try:
     response, ip_address = this.sock.recvfrom(128)
-    response = response.decode(encoding='utf-8')
-    return response
+    decoded = response.decode(encoding='utf-8')
+    return decoded
   except Exception as e:
-    # TODO: Should we throw an exception?
-    print("Error receiving response from drone:\n\t" + str(e))
+      if response[0] == 204:
+          # We've caught the data the drone sends on start up
+          # Just try again
+          return receive()
 
 def send_and_wait(command):
     """Sends a command to the drone and waits for the response.
@@ -60,13 +61,13 @@ def send_and_wait(command):
         str: The response from the drone.
     """
     try:
-        send(command)
-        return receive()
+        _send(command)
+        return _receive()
     except KeyboardInterrupt:
         # TODO: Test this works
         # Kill switch in case of emergency
         print("Interrupted. Attempting to shut off motors...")
-        send("emergency")
+        _send("emergency")
         sys.exit(0)
 
 def start():
@@ -216,8 +217,23 @@ def flip_forward():
     # TODO: Assert battery is high enough to perform flip before attempting
     send_and_wait("flip f")
 
+def flip_backward():
+    """Performs a backward flip."""
+    # TODO: Assert battery is high enough to perform flip before attempting
+    send_and_wait("flip b")
 
-class VideoStream:
+def flip_left():
+    """Performs a left flip."""
+    # TODO: Assert battery is high enough to perform flip before attempting
+    send_and_wait("flip l")
+
+def flip_right():
+    """Performs a right flip."""
+    # TODO: Assert battery is high enough to perform flip before attempting
+    send_and_wait("flip r")
+
+
+class _VideoStream:
     started = False
     thread = None
     kill_event = None
@@ -298,7 +314,7 @@ _video = None
 def start_video():
     global _video
     if _video is None:
-        _video = VideoStream()
+        _video = _VideoStream()
     _video.start()
 
 def stop_video():
