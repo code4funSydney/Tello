@@ -49,7 +49,7 @@ def _receive():
       if response[0] == 204:
           # We've caught the data the drone sends on start up
           # Just try again
-          return receive()
+          return _receive()
 
 def send_and_wait(command):
     """Sends a command to the drone and waits for the response.
